@@ -68,6 +68,23 @@ LOCAL_SANITIZE := never
 include $(LOCAL_PATH)/crypto-sources.mk
 include $(BUILD_HOST_STATIC_LIBRARY)
 
+# host static library, undef option that references dlfcn
+# (dynamic linker) APIs; used by standalone gen_qe tool.
+
+include $(CLEAR_VARS)
+LOCAL_STATIC_LIBRARIES += libz
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE := libcrypto_static_no_dlfcn
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/src/include
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk $(LOCAL_PATH)/crypto-sources.mk
+LOCAL_CFLAGS = -Wno-unused-parameter
+# Windows and Macs both have problems with assembly files
+ifneq ($(HOST_OS),linux)
+LOCAL_CFLAGS += -DOPENSSL_NO_ASM
+endif
+include $(LOCAL_PATH)/crypto-sources.mk
+include $(BUILD_HOST_STATIC_LIBRARY)
+
 # Host shared library
 include $(CLEAR_VARS)
 LOCAL_IS_HOST_MODULE := true
